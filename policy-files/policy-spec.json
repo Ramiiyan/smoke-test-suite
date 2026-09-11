@@ -1,0 +1,11 @@
+{
+  "category": "Mediation",
+  "name": "smokeAddHeader",
+  "version": "v1",
+  "displayName": "Smoke Add Header",
+  "description": "Operational smoke test operation policy. Safe to delete.",
+  "applicableFlows": ["request"],
+  "supportedGateways": ["Synapse"],
+  "supportedApiTypes": ["HTTP"],
+  "policyAttributes": []
+}

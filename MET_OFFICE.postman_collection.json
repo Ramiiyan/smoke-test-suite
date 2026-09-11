@@ -1,0 +1,4667 @@
+{
+  "info": {
+    "_postman_id": "d6dabf39-1768-4816-90bf-95844c097bae",
+    "name": "MET_OFFICE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56436052",
+    "_collection_link": "https://go.postman.co/collection/56436052-d6dabf39-1768-4816-90bf-95844c097bae?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1_Auth",
+      "item": [
+        {
+          "name": "1.1 Token -api_create scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Token issued with requested scope\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token_create\", r.access_token);",
+                  "    pm.test(\"Scope apim:api_create granted\", function () {",
+                  "        pm.expect(r.scope).to.include(\"apim:api_create\");",
+                  "    });",
+                  "}",
+                  "",
+                  "// Pin comparison. Runs on every run after the first.",
+                  "const pinned = pm.environment.get(\"expected_client_id\");",
+                  "const current = pm.environment.get(\"client_id\");",
+                  "if (pinned) {",
+                  "    pm.test(\"OAuth client unchanged since the pinned run\", function () {",
+                  "        pm.expect(current, \"bootstrap registered a different client -- Key Manager rebuilt?\").to.eql(pinned);",
+                  "    });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Credential pin, moved here from the (now removed) DCR request.",
+                  "// client_id is supplied by bootstrap-client.sh. If an admin re-runs bootstrap",
+                  "// after a Key Manager rebuild the client id changes -- pin it on first use and",
+                  "// compare every run after, so that change is reported instead of silently",
+                  "// accepted. Written to the ENVIRONMENT so --export-environment persists it.",
+                  "const current = pm.environment.get(\"client_id\");",
+                  "const pinned  = pm.environment.get(\"expected_client_id\");",
+                  "",
+                  "if (!pinned && current) {",
+                  "    pm.environment.set(\"expected_client_id\", current);",
+                  "    console.log(\"PIN set: expected_client_id=\" + current);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "{{admin_user}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_pass}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "apim:api_create apim:api_delete apim:api_publish apim:document_create apim:document_manage"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Token -api_view scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Token issued with requested scope\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token_view\", r.access_token);",
+                  "    pm.test(\"Scope apim:api_view granted\", function () {",
+                  "        pm.expect(r.scope).to.include(\"apim:api_view\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "{{admin_user}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_pass}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "apim:api_view"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.3 Token -api_publish scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Token issued with requested scope\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token_publish\", r.access_token);",
+                  "    pm.test(\"Scope apim:api_publish granted\", function () {",
+                  "        pm.expect(r.scope).to.include(\"apim:api_publish\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "{{admin_user}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_pass}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "apim:api_publish"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.4 Token -api_subscribe scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Token issued with requested scope\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token_subscribe\", r.access_token);",
+                  "    pm.test(\"Scope apim:subscribe granted\", function () {",
+                  "        pm.expect(r.scope).to.include(\"apim:subscribe\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "{{admin_user}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_pass}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "apim:subscribe"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.5 Token -tier scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Tier token issued\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token_tier\", r.access_token);",
+                  "    pm.test(\"Scope apim:tier_manage granted\", function () {",
+                  "        pm.expect(r.scope).to.include(\"apim:tier_manage\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "{{admin_user}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_pass}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "apim:tier_manage apim:tier_view"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.6 Token -policy scope",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Policy token issued\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"token_policy\", r.access_token);",
+                  "    pm.test(\"Scope apim:api_mediation_policy_manage granted\", function () {",
+                  "        pm.expect(r.scope).to.include(\"apim:api_mediation_policy_manage\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "{{admin_user}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_pass}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "apim:common_operation_policy_view apim:common_operation_policy_manage apim:api_mediation_policy_manage apim:api_create apim:api_view"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2_PreClean",
+      "item": [
+        {
+          "name": "2.1 Find Leftover App",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Leftover app lookup\", () => pm.response.to.have.status(200));",
+                  "",
+                  "// Run-scoped names mean leftovers are SMOKE_TestApp_<epoch>, so match by",
+                  "// PREFIX. The SMOKE prefix is what hard-scopes every delete in this folder.",
+                  "const list = pm.response.code === 200 ? pm.response.json().list : [];",
+                  "const app = list.find(a => a.name && a.name.indexOf(\"SMOKE_TestApp\") === 0);",
+                  "",
+                  "if (app) {",
+                  "    pm.collectionVariables.set(\"old_app_id\", app.applicationId);",
+                  "} else {",
+                  "    pm.execution.setNextRequest(\"2.3 Find Leftover API\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications?limit=50",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.2 Delete Leftover APP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Leftover app deleted\", () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications/{{old_app_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications",
+                "{{old_app_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.3 Find Leftover API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Leftover API lookup\", () => pm.response.to.have.status(200));",
+                  "",
+                  "// Match by SMOKE prefix -- run-scoped names are <api_name>_<epoch>.",
+                  "// Every delete in this folder is hard-scoped to that prefix by construction.",
+                  "const list = pm.response.code === 200 ? pm.response.json().list : [];",
+                  "const base = pm.environment.get(\"api_name\");",
+                  "const api = list.find(a => a.name && a.name.indexOf(base) === 0 && a.name.indexOf(\"SMOKE\") === 0);",
+                  "",
+                  "if (api) {",
+                  "    pm.collectionVariables.set(\"old_api_id\", api.id);",
+                  "} else {",
+                  "    pm.execution.setNextRequest(\"2.9 Find Leftover Throttling Policy\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_view}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis?query=name:SMOKE&limit=50",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "name:SMOKE"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.4 Get Leftover Revisions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Leftover revisions lookup\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const list = pm.response.code === 200 ? (pm.response.json().list || []) : [];",
+                  "",
+                  "if (list.length === 0) {",
+                  "    pm.execution.setNextRequest(\"2.7 Demote Leftover API\");",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"old_revision_id\", list[0].id);",
+                  "    const deployed = (list[0].deploymentInfo || []).length > 0;",
+                  "    if (!deployed) pm.execution.setNextRequest(\"2.6 Delete Leftover Revision\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_view}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{old_api_id}}/revisions",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{old_api_id}}",
+                "revisions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.5 Undeploy Leftover Revision",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"name\": \"{{gw_env_name}}\",\n        \"vhost\": \"{{vhost}}\",\n        \"displayOnDevportal\": true\n    }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{old_api_id}}/undeploy-revision?revisionId={{old_revision_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{old_api_id}}",
+                "undeploy-revision"
+              ],
+              "query": [
+                {
+                  "key": "revisionId",
+                  "value": "{{old_revision_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.6 Delete Leftover Revision",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{old_api_id}}/revisions/{{old_revision_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{old_api_id}}",
+                "revisions",
+                "{{old_revision_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.7 Demote Leftover API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// may already be CREATED \u2014 not a failure\npm.test(\"Demoted or already created\", () => pm.expect(pm.response.code).to.be.oneOf([200, 400, 500]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_publish}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/change-lifecycle?apiId={{old_api_id}}&action=Demote%20to%20Created",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "change-lifecycle"
+              ],
+              "query": [
+                {
+                  "key": "apiId",
+                  "value": "{{old_api_id}}"
+                },
+                {
+                  "key": "action",
+                  "value": "Demote%20to%20Created"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.8 Delete Leftover API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Leftover API deleted\", () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{old_api_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{old_api_id}}"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.9 Find Leftover Throttling Policy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Leftover throttling policy lookup\", () => pm.response.to.have.status(200));",
+                  "",
+                  "// Advanced throttling policies are NOT tied to the API, so nothing else cleans",
+                  "// them up. Without a run_id suffix a policy left behind by an interrupted run",
+                  "// makes the next Create Throttling Policy fail with 409 Resource Already Exists.",
+                  "// Hard-scoped to the SMOKE prefix: the built-in tiers must never be touched.",
+                  "const list = pm.response.code === 200 ? (pm.response.json().list || []) : [];",
+                  "const p = list.find(x => x.policyName && x.policyName.indexOf(\"SMOKE_\") === 0);",
+                  "",
+                  "if (p) {",
+                  "    pm.collectionVariables.set(\"old_throttle_policy_id\", p.policyId);",
+                  "    console.log(\"PRECLEAN: leftover throttling policy '\" + p.policyName + \"' will be removed\");",
+                  "} else {",
+                  "    pm.execution.setNextRequest(\"3.1 Create API\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_tier}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "admin",
+                "v4",
+                "throttling",
+                "policies",
+                "advanced"
+              ],
+              "port": "{{cp_port}}"
+            },
+            "description": "Removes a SMOKE_ throttling policy left behind by an interrupted run. Needs apim:tier_view."
+          },
+          "response": []
+        },
+        {
+          "name": "2.10 Delete Leftover Throttling Policy",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"old_throttle_policy_id\")) {",
+                  "    console.log(\"SKIP Delete Leftover Throttling Policy: nothing to remove\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Leftover throttling policy removed\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "pm.collectionVariables.unset(\"old_throttle_policy_id\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_tier}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced/{{old_throttle_policy_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "admin",
+                "v4",
+                "throttling",
+                "policies",
+                "advanced",
+                "{{old_throttle_policy_id}}"
+              ],
+              "port": "{{cp_port}}"
+            },
+            "description": "Deletes only a SMOKE_-prefixed policy found by the previous request."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3_Publisher",
+      "item": [
+        {
+          "name": "3.1 Create API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"API created\", function () {",
+                  "    pm.expect(pm.response.code,",
+                  "        \"expected 201.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"api_id\", r.id);",
+                  "    const expected = pm.environment.get(\"api_name\");",
+                  "    pm.test(\"API name matches the configured name\", function () {",
+                  "        pm.expect(r.name).to.eql(expected);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{api_name}}\",\n    \"description\": \"Operational smoke test API. Safe to delete.\",\n    \"context\": \"/{{api_context}}\",\n    \"version\": \"{{api_version}}\",\n    \"provider\": \"{{admin_user}}\",\n    \"lifeCycleStatus\": \"CREATED\",\n    \"type\": \"HTTP\",\n    \"transport\": [\n        \"https\"\n    ],\n    \"visibility\": \"PUBLIC\",\n    \"subscriptionAvailability\": \"CURRENT_TENANT\",\n    \"policies\": [\n        \"Unlimited\"\n    ],\n    \"apiThrottlingPolicy\": \"Unlimited\",\n    \"securityScheme\": [\n        \"oauth2\"\n    ],\n    \"endpointConfig\": {\n        \"endpoint_type\": \"http\",\n        \"production_endpoints\": {\n            \"url\": \"{{backend_url}}\"\n        },\n        \"sandbox_endpoints\": {\n            \"url\": \"{{backend_url}}\"\n        }\n    },\n    \"operations\": [\n        {\n            \"target\": \"/get\",\n            \"verb\": \"GET\",\n            \"authType\": \"Application & Application User\",\n            \"throttlingPolicy\": \"Unlimited\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Get api",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"API readable with view scope\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const o = pm.response.json();",
+                  "    const expected = pm.environment.get(\"api_name\");",
+                  "    pm.test(\"API name matches the configured name\", function () {",
+                  "        pm.expect(o.name).to.eql(expected);",
+                  "    });",
+                  "    // Stash the whole object so Update API can round-trip it (PUT needs the full body).",
+                  "    pm.collectionVariables.set(\"api_object\", JSON.stringify(o));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_view}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 List APIs (Publisher)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Publisher API list readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test(\"Response has a list array\", function () {",
+                  "        pm.expect(body.list).to.be.an(\"array\");",
+                  "    });",
+                  "    pm.test(\"At least one API is listed\", function () {",
+                  "        pm.expect(body.list.length).to.be.above(0);",
+                  "    });",
+                  "}",
+                  "",
+                  "// Deliberately does NOT assert that this run's own API appears here.",
+                  "// The list is a page (limit=20) of whatever the deployment holds, so on a",
+                  "// customer with more than 20 APIs ours may legitimately be on a later page --",
+                  "// asserting membership would fail on a healthy system. That the API exists is",
+                  "// already proven by \"Get api\" (GET by id) and \"Get API in DevPortal\" (query by",
+                  "// name). This request checks only that the listing endpoint works and the",
+                  "// deployment has APIs."
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_view}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis?limit=20",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis"
+              ],
+              "port": "{{cp_port}}",
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Inventory check: confirms the Publisher listing endpoint works and the deployment has at least one API. Does not assert which APIs are present -- see the note in the test script."
+          },
+          "response": []
+        },
+        {
+          "name": "3.4 List Operation Policies",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Operation policy list readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test(\"Response has a list array\", function () {",
+                  "        pm.expect(body.list).to.be.an(\"array\");",
+                  "    });",
+                  "    pm.test(\"At least one operation policy exists\", function () {",
+                  "        pm.expect(body.list.length).to.be.above(0);",
+                  "    });",
+                  "    // Inventory: what the deployment actually has, for the engineer reading the run.",
+                  "    console.log(\"OPERATION POLICIES (\" + body.count + \" total, showing \" + body.list.length + \"):\");",
+                  "    body.list.forEach(p => console.log(\"   - \" + p.name + \" \" + p.version + \"  [\" + p.category + \"]\"));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_policy}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/operation-policies?limit=20",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "operation-policies"
+              ],
+              "port": "{{cp_port}}",
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Inventory check: lists the operation/mediation policies present in the Publisher. Requires apim:common_operation_policy_view (carried by {{token_policy}}). Policy names are written to the console so a pre/post run shows what the customer has."
+          },
+          "response": []
+        },
+        {
+          "name": "3.5 List Subscription Throttling Policies",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Subscription throttling policy list readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test(\"Response has a list array\", function () {",
+                  "        pm.expect(body.list).to.be.an(\"array\");",
+                  "    });",
+                  "    pm.test(\"At least one subscription tier exists\", function () {",
+                  "        pm.expect(body.list.length).to.be.above(0);",
+                  "    });",
+                  "    console.log(\"SUBSCRIPTION THROTTLING TIERS (\" + body.count + \"):\");",
+                  "    // The Publisher shape is FLAT (name/requestCount/unitTime/timeUnit).",
+                  "    // The Admin API nests the same data under defaultLimit.requestCount --",
+                  "    // do not copy field names between the two.",
+                  "    body.list.forEach(p => {",
+                  "        console.log(\"   - \" + p.name + \"  \" + p.requestCount + \" req / \" +",
+                  "                    p.unitTime + \" \" + p.timeUnit + \"  (\" + p.tierPlan + \")\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_tier}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/throttling-policies/subscription",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "throttling-policies",
+                "subscription"
+              ],
+              "port": "{{cp_port}}"
+            },
+            "description": "Inventory check: subscription-level throttling tiers visible to the Publisher. Requires apim:tier_view (carried by {{token_tier}}). Note /throttling-policies/advanced is NOT exposed here -- advanced tiers are admin-only and 404 on the Publisher API."
+          },
+          "response": []
+        },
+        {
+          "name": "3.6 Update API",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Guard AND body build must both live here -- a generic guard that replaces this",
+                  "// script leaves {{api_update_body}} unset, which sends the literal placeholder",
+                  "// and the server rejects the body with a 500 from the JAX-RS deserialiser.",
+                  "const raw = pm.collectionVariables.get(\"api_object\");",
+                  "",
+                  "if (!raw) {",
+                  "    console.log(\"SKIP Update API: api_object was not captured by Get api\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "} else {",
+                  "    // PUT requires the full API object; round-trip it and change only description.",
+                  "    const o = JSON.parse(raw);",
+                  "    o.description = \"Updated by smoke suite\";",
+                  "    pm.collectionVariables.set(\"api_update_body\", JSON.stringify(o));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"API updated\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const want = \"Updated by smoke suite\";",
+                  "    pm.test(\"Description was changed\", function () {",
+                  "        pm.expect(pm.response.json().description).to.eql(want);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}"
+              ],
+              "port": "{{cp_port}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{{api_update_body}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.7 Create Revision",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Revision created\", function () {",
+                  "    pm.expect(pm.response.code,",
+                  "        \"expected 201.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"revision_id\", pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"description\": \"Smoke test revision\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/revisions",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "revisions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.8 Deploy Revision",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Revision deployed to gateway\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"name\": \"{{gw_env_name}}\",\n        \"vhost\": \"{{vhost}}\",\n        \"displayOnDevportal\": true\n    }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/deploy-revision?revisionId={{revision_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "deploy-revision"
+              ],
+              "query": [
+                {
+                  "key": "revisionId",
+                  "value": "{{revision_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.9 Verify Deployment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Revisions readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Deploy returning 201 is not proof the artifact registered against both labels.",
+                  "if (pm.response.code === 200) {",
+                  "    const list = pm.response.json().list || [];",
+                  "    const rev = list.find(r => r.id === pm.collectionVariables.get(\"revision_id\"));",
+                  "    pm.test(\"Deployed revision is present\", function () {",
+                  "        pm.expect(rev, \"revision not in list\").to.not.be.undefined;",
+                  "    });",
+                  "    if (rev) {",
+                  "        const envs = (rev.deploymentInfo || []).map(d => d.name);",
+                  "        pm.test(\"Registered against the gateway environment\", function () {",
+                  "            pm.expect(envs).to.include(pm.environment.get(\"gw_env_name\"));",
+                  "        });",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_view}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/revisions",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "revisions"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.10 Change Lifecycle to Publish",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"API published\", function () {\n    pm.response.to.have.status(200);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_publish}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/change-lifecycle?apiId={{api_id}}&action=Publish",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "change-lifecycle"
+              ],
+              "query": [
+                {
+                  "key": "apiId",
+                  "value": "{{api_id}}"
+                },
+                {
+                  "key": "action",
+                  "value": "Publish"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4_Documents",
+      "item": [
+        {
+          "name": "4.1 Create Document",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"api_id\")) {",
+                  "    console.log(\"SKIP Create Document: api_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Document created\", function () {",
+                  "    pm.expect(pm.response.code,",
+                  "        \"expected 201.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"document_id\", r.documentId);",
+                  "    pm.test(\"Document name matches the configured name\", function () {",
+                  "        pm.expect(r.name).to.eql(\"SMOKE_Doc\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "documents"
+              ],
+              "port": "{{cp_port}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"SMOKE_Doc\",\n    \"type\": \"HOWTO\",\n    \"summary\": \"Smoke test document\",\n    \"sourceType\": \"INLINE\",\n    \"visibility\": \"API_LEVEL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Get Document",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"document_id\")) {",
+                  "    console.log(\"SKIP Get Document: document_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Document readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Returned document is the one created\", function () {",
+                  "        pm.expect(pm.response.json().documentId).to.eql(pm.collectionVariables.get(\"document_id\"));",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_view}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents/{{document_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "documents",
+                "{{document_id}}"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 Update Document",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"document_id\")) {",
+                  "    console.log(\"SKIP Update Document: document_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Document updated\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Summary was changed\", function () {",
+                  "        pm.expect(pm.response.json().summary).to.eql(",
+                  "            \"Updated by smoke suite\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents/{{document_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "documents",
+                "{{document_id}}"
+              ],
+              "port": "{{cp_port}}"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"documentId\": \"{{document_id}}\",\n    \"name\": \"SMOKE_Doc\",\n    \"type\": \"HOWTO\",\n    \"summary\": \"Updated by smoke suite\",\n    \"sourceType\": \"INLINE\",\n    \"visibility\": \"API_LEVEL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.4 Delete Document",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"document_id\")) {",
+                  "    console.log(\"SKIP Delete Document: document_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Document deleted\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_create}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents/{{document_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "documents",
+                "{{document_id}}"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.5 Verify Document Deleted",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"document_id\")) {",
+                  "    console.log(\"SKIP Verify Document Deleted: document_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Deletion is not synchronous in APIM; assert NOT retrievable, not a strict 404.",
+                  "pm.test(\"Document no longer retrievable\", function () {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([200]);",
+                  "});",
+                  "pm.collectionVariables.unset(\"document_id\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_view}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents/{{document_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "documents",
+                "{{document_id}}"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5_DevPortal",
+      "item": [
+        {
+          "name": "5.1 Create Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Application created\", function () {",
+                  "    pm.expect(pm.response.code,",
+                  "        \"expected 201.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"app_id\", pm.response.json().applicationId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"SMOKE_TestApp\",\n  \"throttlingPolicy\": \"Unlimited\",\n  \"description\": \"Smoke test application. Safe to delete.\",\n  \"tokenType\": \"JWT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.2 List Applications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Application list readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test(\"At least one application is listed\", function () {",
+                  "        pm.expect(body.list.length).to.be.above(0);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications?limit=20",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications"
+              ],
+              "port": "{{cp_port}}",
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.3 Get Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Application readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const expected = \"SMOKE_TestApp\";",
+                  "    pm.test(\"Application name matches the configured name\", function () {",
+                  "        pm.expect(pm.response.json().name).to.eql(expected);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications/{{app_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.4 Get API in DevPortal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const MAX = 20;",
+                  "let n = parseInt(pm.collectionVariables.get(\"devportal_retry\") || 0);",
+                  "const hit = pm.response.code === 200 && (pm.response.json().list || []).length > 0;",
+                  "",
+                  "if (hit) {",
+                  "    pm.collectionVariables.set(\"devportal_retry\", 0);",
+                  "    pm.collectionVariables.set(\"dev_api_id\", pm.response.json().list[0].id);",
+                  "    pm.test(\"API discoverable in DevPortal\", function () {",
+                  "        pm.expect(pm.response.json().list.length).to.be.above(0);",
+                  "    });",
+                  "} else if (n < MAX) {",
+                  "    pm.collectionVariables.set(\"devportal_retry\", n + 1);",
+                  "    const t = Date.now();",
+                  "    while (Date.now() - t < 1000) { /* poll interval */ }",
+                  "    pm.execution.setNextRequest(\"5.4 Get API in DevPortal\");",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"devportal_retry\", 0);",
+                  "    pm.test(\"API discoverable in DevPortal\", function () {",
+                  "        pm.expect.fail(\"API not visible in DevPortal after \" + MAX +",
+                  "          \" attempts. DevPortal propagation after publish has not completed -- \" +",
+                  "          \"check the CP registry/indexing and the publish lifecycle event.\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/apis?query=name:{{api_name}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "apis"
+              ],
+              "port": "{{cp_port}}",
+              "query": [
+                {
+                  "key": "query",
+                  "value": "name:{{api_name}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.5 List APIs (DevPortal)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"DevPortal API list readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test(\"Response has a list array\", function () {",
+                  "        pm.expect(body.list).to.be.an(\"array\");",
+                  "    });",
+                  "    pm.test(\"At least one API is listed\", function () {",
+                  "        pm.expect(body.list.length).to.be.above(0);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/apis?limit=20",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "apis"
+              ],
+              "port": "{{cp_port}}",
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.6 Subscribe to API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Subscription created\", function () {",
+                  "    pm.expect(pm.response.code,",
+                  "        \"expected 201.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"subscription_id\", pm.response.json().subscriptionId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"apiId\": \"{{dev_api_id}}\",\n    \"applicationId\": \"{{app_id}}\",\n    \"throttlingPolicy\": \"Unlimited\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/subscriptions",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "subscriptions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.7 List Subscriptions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Subscription list readable\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    pm.test(\"At least one subscription is listed\", function () {",
+                  "        pm.expect(body.list.length).to.be.above(0);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/subscriptions?apiId={{dev_api_id}}&limit=20",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "subscriptions"
+              ],
+              "port": "{{cp_port}}",
+              "query": [
+                {
+                  "key": "apiId",
+                  "value": "{{dev_api_id}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.8 Get Application details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Application shows subscription\", function () {\n    pm.response.to.have.status(200);\n    pm.expect(pm.response.json().subscriptionCount).to.be.above(0);\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"apiId\": \"{{dev_api_id}}\",\n    \"applicationId\": \"{{app_id}}\",\n    \"throttlingPolicy\": \"Unlimited\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications/{{app_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.9 Generate Application Keys",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Keys generated\", function () {",
+                  "    pm.expect(pm.response.code,",
+                  "        \"expected 200.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const r = pm.response.json();",
+                  "    pm.collectionVariables.set(\"consumer_key\", r.consumerKey);",
+                  "    pm.collectionVariables.set(\"consumer_secret\", r.consumerSecret);",
+                  "    pm.collectionVariables.set(\"key_mapping_id\", r.keyMappingId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyType\": \"PRODUCTION\",\n  \"keyManager\": \"Resident Key Manager\",\n  \"grantTypesToBeSupported\": [\"client_credentials\", \"password\", \"refresh_token\"],\n  \"callbackUrl\": \"\",\n  \"scopes\": [\"default\"],\n  \"validityTime\": 3600,\n  \"additionalProperties\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications/{{app_id}}/generate-keys",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications",
+                "{{app_id}}",
+                "generate-keys"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.10 Get OAuth Keys",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"OAuth keys readable\", function () {\n    pm.response.to.have.status(200);\n    pm.expect(pm.response.json().list.length).to.be.above(0);\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications/{{app_id}}/oauth-keys",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications",
+                "{{app_id}}",
+                "oauth-keys"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6_Gateway",
+      "item": [
+        {
+          "name": "6.1 Generate Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Access token issued\", function () {\n    pm.response.to.have.status(200);\n});\n\nif (pm.response.code === 200) {\n    pm.collectionVariables.set(\"access_token\", pm.response.json().access_token);\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{consumer_key}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{consumer_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                },
+                {
+                  "key": "scope",
+                  "value": "default"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.2 Invoke API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const MAX = 20;",
+                  "let n = parseInt(pm.collectionVariables.get(\"invoke_retry\") || 0);",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set(\"invoke_retry\", 0);",
+                  "    pm.test(\"API invocation succeeds\", function () {",
+                  "        pm.response.to.have.status(200);",
+                  "    });",
+                  "} else if (n < MAX) {",
+                  "    // Gateway artifact sync is async (DataRetrievalMode=async): ~5-6s after deploy.",
+                  "    pm.collectionVariables.set(\"invoke_retry\", n + 1);",
+                  "    const t = Date.now();",
+                  "    while (Date.now() - t < 1000) { /* poll interval */ }",
+                  "    pm.execution.setNextRequest(\"6.2 Invoke API\");",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"invoke_retry\", 0);",
+                  "    let why = \"gateway did not serve the API after \" + MAX + \" attempts. \";",
+                  "    if (pm.response.code === 404) {",
+                  "        why += \"404: artifact never reached this gateway -- check CP->GW artifact sync \" +",
+                  "               \"and that the revision is deployed to the Default label.\";",
+                  "    } else if (pm.response.code === 401) {",
+                  "        why += \"401: gateway rejected the token -- check Key Manager / JWKS reachability.\";",
+                  "    } else if (pm.response.code === 403) {",
+                  "        why += \"403: subscription not visible to the gateway -- check subscription event sync.\";",
+                  "    } else if (pm.response.code >= 500) {",
+                  "        why += \"5xx: gateway reached the API but the backend call failed -- check backend \" +",
+                  "               \"reachability from the GW node.\";",
+                  "    } else {",
+                  "        why += \"last status \" + pm.response.code;",
+                  "    }",
+                  "    pm.test(\"API invocation succeeds\", function () { pm.expect.fail(why); });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{gw_host}}:{{gw_port}}/{{api_context}}/{{api_version}}/get",
+              "protocol": "https",
+              "host": [
+                "{{gw_host}}"
+              ],
+              "path": [
+                "{{api_context}}",
+                "{{api_version}}",
+                "get"
+              ],
+              "port": "{{gw_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.3 Revoke Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Token revoked\", function () {\n    pm.response.to.have.status(200);\n});\npm.collectionVariables.set(\"retry_count\", 0);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{consumer_key}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{consumer_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/revoke",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "revoke"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.4 Invoke with Revoked Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const MAX = 10;",
+                  "let n = parseInt(pm.collectionVariables.get(\"retry_count\") || 0);",
+                  "",
+                  "if (pm.response.code === 401 || pm.response.code === 403) {",
+                  "    pm.collectionVariables.set(\"retry_count\", 0);",
+                  "    pm.test(\"Revoked token rejected by gateway\", function () {",
+                  "        pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "    });",
+                  "} else if (n < MAX) {",
+                  "    pm.collectionVariables.set(\"retry_count\", n + 1);",
+                  "    // crude sleep \u2014 the Postman sandbox has no real blocking wait",
+                  "    const t = Date.now();",
+                  "    while (Date.now() - t < 2000) { /* wait 2s */ }",
+                  "    pm.execution.setNextRequest(\"6.4 Invoke with Revoked Token\");",
+                  "} else {",
+                  "    pm.collectionVariables.set(\"retry_count\", 0);",
+                  "    pm.test(\"Revoked token rejected by gateway\", function () {",
+                  "        pm.expect.fail(",
+                  "          \"Last status \" + pm.response.code + \" after \" + MAX + \" attempts. The tokenRevocation JMS \" +",
+                  "          \"event is not reaching this gateway \u2014 check the TM JMS topic and the \" +",
+                  "          \"gateway event listener config.\"",
+                  "        );",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{gw_host}}:{{gw_port}}/{{api_context}}/{{api_version}}/get",
+              "protocol": "https",
+              "host": [
+                "{{gw_host}}"
+              ],
+              "path": [
+                "{{api_context}}",
+                "{{api_version}}",
+                "get"
+              ],
+              "port": "{{gw_port}}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7_Policy",
+      "item": [
+        {
+          "name": "7.1_Throttling",
+          "item": [
+            {
+              "name": "7.1.1 Create Throttling Policy",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Throttling policy created\", function () {",
+                      "    pm.expect(pm.response.code,",
+                      "        \"expected 201.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const r = pm.response.json();",
+                      "    pm.collectionVariables.set(\"throttle_policy_id\", r.policyId);",
+                      "    pm.test(\"Policy name matches the configured name\", function () {",
+                      "        pm.expect(r.policyName).to.eql(\"SMOKE_Throttle\");",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_tier}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "admin",
+                    "v4",
+                    "throttling",
+                    "policies",
+                    "advanced"
+                  ],
+                  "port": "{{cp_port}}"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"policyName\": \"SMOKE_Throttle\",\n    \"displayName\": \"SMOKE_Throttle\",\n    \"description\": \"Operational smoke test throttling policy. Safe to delete.\",\n    \"conditionalGroups\": [],\n    \"defaultLimit\": {\n        \"type\": \"REQUESTCOUNTLIMIT\",\n        \"requestCount\": {\n            \"timeUnit\": \"min\",\n            \"unitTime\": 1,\n            \"requestCount\": 1000\n        }\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.1.2 Get API for Policy Attach",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (!pm.collectionVariables.get(\"throttle_policy_id\")) {",
+                      "    console.log(\"SKIP Get API for Policy Attach: throttle_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"API readable before attach\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 200) {",
+                      "    // Attaching is a full-object PUT, so fetch the CURRENT object. The copy",
+                      "    // stashed back in C_Publisher predates publish + revision deploy, and",
+                      "    // PUTting that stale object would undo them.",
+                      "    pm.collectionVariables.set(\"api_object_now\", JSON.stringify(pm.response.json()));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_view}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                },
+                "description": "Fetches the live API object so the attach PUT sends current state."
+              },
+              "response": []
+            },
+            {
+              "name": "7.1.3 Attach Throttling Policy to API",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Setting apiThrottlingPolicy is sufficient -- the `policies` array does not",
+                      "// need to change (verified against 4.5.0). Note the field starts as null, not",
+                      "// \"Unlimited\", so detaching means restoring the built-in \"Unlimited\" tier.",
+                      "const raw = pm.collectionVariables.get(\"api_object_now\");",
+                      "if (!raw || !pm.collectionVariables.get(\"throttle_policy_id\")) {",
+                      "    console.log(\"SKIP Attach Throttling Policy to API: no API object or policy id\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "} else {",
+                      "    const o = JSON.parse(raw);",
+                      "    o.apiThrottlingPolicy = \"SMOKE_Throttle\";",
+                      "    pm.collectionVariables.set(\"api_attach_body\", JSON.stringify(o));",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Policy attached to API\", function () {",
+                      "    pm.expect(pm.response.code,",
+                      "        \"expected 200.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(200);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 200) {",
+                      "    pm.test(\"Response reports the smoke policy\", function () {",
+                      "        pm.expect(pm.response.json().apiThrottlingPolicy).to.eql(\"SMOKE_Throttle\");",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_create}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                },
+                "description": "Attaches the advanced throttling policy by setting apiThrottlingPolicy. The API is PUBLISHED here, so this needs apim:api_publish (carried by token_create).",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{api_attach_body}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.1.4 Verify Policy Attached",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (!pm.collectionVariables.get(\"throttle_policy_id\")) {",
+                      "    console.log(\"SKIP Verify Policy Attached: throttle_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"API readable after attach\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 200) {",
+                      "    const o = pm.response.json();",
+                      "    // NOTE: this proves the ASSOCIATION is persisted. It does NOT prove the",
+                      "    // limit is enforced -- enforcement needs a revision redeploy, which this",
+                      "    // suite deliberately does not do.",
+                      "    pm.test(\"Attached policy persisted on the API\", function () {",
+                      "        pm.expect(o.apiThrottlingPolicy).to.eql(\"SMOKE_Throttle\");",
+                      "    });",
+                      "    pm.collectionVariables.set(\"api_object_now\", JSON.stringify(o));",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_view}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                },
+                "description": "Confirms the association persisted. Does NOT prove enforcement."
+              },
+              "response": []
+            },
+            {
+              "name": "7.1.5 Detach Throttling Policy",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Detach is mandatory, not tidiness: DELETE on an attached policy returns",
+                      "// 403 \"Cannot delete the advanced policy ... because it is already associated\".",
+                      "const raw = pm.collectionVariables.get(\"api_object_now\");",
+                      "if (!raw || !pm.collectionVariables.get(\"throttle_policy_id\")) {",
+                      "    console.log(\"SKIP Detach Throttling Policy: no API object or policy id\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "} else {",
+                      "    const o = JSON.parse(raw);",
+                      "    o.apiThrottlingPolicy = \"Unlimited\";",
+                      "    pm.collectionVariables.set(\"api_attach_body\", JSON.stringify(o));",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Policy detached from API\", function () {",
+                      "    pm.expect(pm.response.code,",
+                      "        \"expected 200. Detach MUST succeed -- APIM returns 403 when deleting a policy that is still attached to an API.\").to.eql(200);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 200) {",
+                      "    pm.test(\"API restored to the Unlimited tier\", function () {",
+                      "        pm.expect(pm.response.json().apiThrottlingPolicy).to.eql(\"Unlimited\");",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_create}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                },
+                "description": "Restores the built-in Unlimited tier so the policy can be deleted.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{api_attach_body}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.1.6 Get Throttling Policy",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                      "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                      "if (!pm.collectionVariables.get(\"throttle_policy_id\")) {",
+                      "    console.log(\"SKIP Get Throttling Policy: throttle_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Throttling policy readable by id\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 200) {",
+                      "    pm.test(\"Returned policy is the one created\", function () {",
+                      "        pm.expect(pm.response.json().policyId).to.eql(pm.collectionVariables.get(\"throttle_policy_id\"));",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_tier}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced/{{throttle_policy_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "admin",
+                    "v4",
+                    "throttling",
+                    "policies",
+                    "advanced",
+                    "{{throttle_policy_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.1.7 Delete Throttling Policy",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                      "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                      "if (!pm.collectionVariables.get(\"throttle_policy_id\")) {",
+                      "    console.log(\"SKIP Delete Throttling Policy: throttle_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Throttling policy deleted\", function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_tier}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced/{{throttle_policy_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "admin",
+                    "v4",
+                    "throttling",
+                    "policies",
+                    "advanced",
+                    "{{throttle_policy_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.1.8 Verify Throttling Policy Deleted",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Throttling policy no longer retrievable\", function () {",
+                      "    pm.expect(pm.response.code).to.not.be.oneOf([200]);",
+                      "});",
+                      "pm.collectionVariables.unset(\"throttle_policy_id\");"
+                    ]
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                      "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                      "if (!pm.collectionVariables.get(\"throttle_policy_id\")) {",
+                      "    console.log(\"SKIP Verify Throttling Policy Deleted: throttle_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_tier}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced/{{throttle_policy_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "admin",
+                    "v4",
+                    "throttling",
+                    "policies",
+                    "advanced",
+                    "{{throttle_policy_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "7.2_OperationPolicy",
+          "item": [
+            {
+              "name": "7.2.1 Create Operation Policy",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                      "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                      "if (!pm.collectionVariables.get(\"api_id\")) {",
+                      "    console.log(\"SKIP Create Operation Policy: api_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Operation policy created\", function () {",
+                      "    pm.expect(pm.response.code,",
+                      "        \"expected 201.  [NOTE] this request gates the rest of its folder -- when it fails the dependent requests are SKIPPED, so the total check count drops. See the SKIPPED summary at the end of the run.\").to.eql(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const r = pm.response.json();",
+                      "    pm.collectionVariables.set(\"op_policy_id\", r.id);",
+                      "    pm.test(\"Policy is API-scoped\", function () {",
+                      "        pm.expect(r.isAPISpecific).to.eql(true);",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_policy}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/operation-policies",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}",
+                    "operation-policies"
+                  ],
+                  "port": "{{cp_port}}"
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "policySpecFile",
+                      "type": "file",
+                      "src": "policy-files/policy-spec.json",
+                      "contentType": "application/json"
+                    },
+                    {
+                      "key": "synapsePolicyDefinitionFile",
+                      "type": "file",
+                      "src": "policy-files/policy-definition.j2"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.2.2 Get Operation Policy",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                      "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                      "if (!pm.collectionVariables.get(\"op_policy_id\")) {",
+                      "    console.log(\"SKIP Get Operation Policy: op_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Operation policy readable by id\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 200) {",
+                      "    pm.test(\"Returned policy is the one created\", function () {",
+                      "        pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get(\"op_policy_id\"));",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_policy}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/operation-policies/{{op_policy_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}",
+                    "operation-policies",
+                    "{{op_policy_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.2.3 Delete Operation Policy",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                      "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                      "if (!pm.collectionVariables.get(\"op_policy_id\")) {",
+                      "    console.log(\"SKIP Delete Operation Policy: op_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Operation policy deleted\", function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_policy}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/operation-policies/{{op_policy_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}",
+                    "operation-policies",
+                    "{{op_policy_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "7.2.4 Verify Operation Policy Deleted",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Operation policy no longer retrievable\", function () {",
+                      "    pm.expect(pm.response.code).to.not.be.oneOf([200]);",
+                      "});",
+                      "pm.collectionVariables.unset(\"op_policy_id\");"
+                    ]
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                      "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                      "if (!pm.collectionVariables.get(\"op_policy_id\")) {",
+                      "    console.log(\"SKIP Verify Operation Policy Deleted: op_policy_id is empty\");",
+                      "    pm.collectionVariables.set(\"skipped_list\",",
+                      "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                      "    pm.execution.skipRequest();",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_policy}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/operation-policies/{{op_policy_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}",
+                    "operation-policies",
+                    "{{op_policy_id}}"
+                  ],
+                  "port": "{{cp_port}}"
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8_Teardown",
+      "item": [
+        {
+          "name": "8.1 Refresh Delete Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Fresh teardown token issued\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set(\"teardown_token\", pm.response.json().access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "username",
+                  "value": "{{admin_user}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{admin_pass}}"
+                },
+                {
+                  "key": "scope",
+                  "value": "apim:api_create apim:api_publish apim:api_view apim:api_delete apim:subscribe apim:app_manage apim:sub_manage"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.2 Remove Subscription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Subscription removed\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"subscription_id\")) {",
+                  "    console.log(\"SKIP Remove Subscription: subscription_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/subscriptions/{{subscription_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "subscriptions",
+                "{{subscription_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.3 Remove Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Application removed\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"app_id\")) {",
+                  "    console.log(\"SKIP Remove Application: app_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications/{{app_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications",
+                "{{app_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.4 Undeploy Revision",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"name\": \"{{gw_env_name}}\",\n        \"vhost\": \"{{vhost}}\",\n        \"displayOnDevportal\": false\n    }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/undeploy-revision?revisionId={{revision_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "undeploy-revision"
+              ],
+              "query": [
+                {
+                  "key": "revisionId",
+                  "value": "{{revision_id}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"revision_id\")) {",
+                  "    console.log(\"SKIP Undeploy Revision: revision_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.5 Delete Revision",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/revisions/{{revision_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "revisions",
+                "{{revision_id}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"revision_id\")) {",
+                  "    console.log(\"SKIP Delete Revision: revision_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.6 Demote to Created",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/change-lifecycle?apiId={{api_id}}&action=Demote%20to%20Created",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "change-lifecycle"
+              ],
+              "query": [
+                {
+                  "key": "apiId",
+                  "value": "{{api_id}}"
+                },
+                {
+                  "key": "action",
+                  "value": "Demote%20to%20Created"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"api_id\")) {",
+                  "    console.log(\"SKIP Demote to Created: api_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8.7 Delete API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"API deleted\", function () {\n    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"api_id\")) {",
+                  "    console.log(\"SKIP Delete API: api_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.8 Verify Subscription Deleted",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"subscription_id\")) {",
+                  "    console.log(\"SKIP Verify Subscription Deleted: subscription_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Deletion is not synchronous -- an immediate GET has returned both 404 and 500.",
+                  "// Assert NOT RETRIEVABLE rather than a strict status.",
+                  "pm.test(\"Subscription no longer retrievable\", function () {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([200]);",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/subscriptions/{{subscription_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "subscriptions",
+                "{{subscription_id}}"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.9 Verify Application Deleted",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"app_id\")) {",
+                  "    console.log(\"SKIP Verify Application Deleted: app_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Deletion is not synchronous -- an immediate GET has returned both 404 and 500.",
+                  "// Assert NOT RETRIEVABLE rather than a strict status.",
+                  "pm.test(\"Application no longer retrievable\", function () {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([200]);",
+                  "});",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/devportal/v3/applications/{{app_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "devportal",
+                "v3",
+                "applications",
+                "{{app_id}}"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "8.10 Verify API Deleted",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"api_id\")) {",
+                  "    console.log(\"SKIP Verify API Deleted: api_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Deletion is not synchronous -- an immediate GET has returned both 404 and 500.",
+                  "// Assert NOT RETRIEVABLE rather than a strict status.",
+                  "pm.test(\"API no longer retrievable\", function () {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([200]);",
+                  "});",
+                  "",
+                  "",
+                  "// ---------------------------------------------------------------------------",
+                  "// End-of-run summary. Newman's table shows failures but NOT skips, so a run can",
+                  "// report \"0 failed\" while quietly having executed far fewer checks. This prints",
+                  "// what was skipped and why, for whoever is reading the run.",
+                  "// ---------------------------------------------------------------------------",
+                  "const skipped = (pm.collectionVariables.get(\"skipped_list\") || \"\")",
+                  "                  .split(\"|\").filter(x => x.length > 0);",
+                  "console.log(\"===== RUN SUMMARY =====\");",
+                  "if (skipped.length === 0) {",
+                  "    console.log(\"SKIPPED: none -- every request executed.\");",
+                  "} else {",
+                  "    console.log(\"SKIPPED (\" + skipped.length + \") -- these did NOT run, so the check\");",
+                  "    console.log(\"count below is LOWER than a full run. Fix the failure above first:\");",
+                  "    skipped.forEach(s => console.log(\"   - \" + s));",
+                  "}",
+                  "console.log(\"========================\");",
+                  "pm.collectionVariables.unset(\"skipped_list\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teardown_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}"
+              ],
+              "port": "{{cp_port}}"
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Fail fast if bootstrap has not been run. Without this the first token request",
+          "// returns a bare 401 and the real cause (no client credentials) is three",
+          "// requests away from the error.",
+          "const cid  = pm.environment.get(\"client_id\");",
+          "const csec = pm.environment.get(\"client_secret\");",
+          "if (!cid || !csec) {",
+          "    pm.execution.setNextRequest(null);   // stop the run rather than cascade",
+          "    throw new Error(",
+          "        \"client_id/client_secret are missing from the environment. \" +",
+          "        \"Run ./bootstrap-client.sh once as an admin before using this suite, e.g.\\n\" +",
+          "        \"  ./bootstrap-client.sh --host localhost --port 9443 --admin-user admin \\\\\\n\" +",
+          "        \"      --env APIM-4.5.0-Local-LeastPriv.postman_environment.json\"",
+          "    );",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token_create",
+      "value": ""
+    },
+    {
+      "key": "token_view",
+      "value": ""
+    },
+    {
+      "key": "token_publish",
+      "value": ""
+    },
+    {
+      "key": "token_subscribe",
+      "value": ""
+    },
+    {
+      "key": "api_id",
+      "value": ""
+    },
+    {
+      "key": "revision_id",
+      "value": ""
+    },
+    {
+      "key": "app_id",
+      "value": ""
+    },
+    {
+      "key": "subscription_id",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "secret": true
+    },
+    {
+      "key": "consumer_key",
+      "value": ""
+    },
+    {
+      "key": "consumer_secret",
+      "value": ""
+    },
+    {
+      "key": "bearer_token_095i",
+      "secret": true
+    },
+    {
+      "key": "bearer_token_0ei9",
+      "secret": true
+    },
+    {
+      "key": "bearer_token_1aeg",
+      "secret": true
+    },
+    {
+      "key": "dev_api_id",
+      "value": ""
+    },
+    {
+      "key": "key_mapping_id",
+      "value": ""
+    },
+    {
+      "key": "old_app_id",
+      "value": ""
+    },
+    {
+      "key": "old_api_id",
+      "value": ""
+    },
+    {
+      "key": "old_revision_id",
+      "value": ""
+    },
+    {
+      "key": "retry_count",
+      "value": ""
+    },
+    {
+      "key": "devportal_retry",
+      "value": ""
+    },
+    {
+      "key": "teardown_token",
+      "value": ""
+    },
+    {
+      "key": "token_tier",
+      "value": ""
+    },
+    {
+      "key": "token_policy",
+      "value": ""
+    },
+    {
+      "key": "throttle_policy_id",
+      "value": ""
+    },
+    {
+      "key": "op_policy_id",
+      "value": ""
+    },
+    {
+      "key": "invoke_retry",
+      "value": ""
+    },
+    {
+      "key": "document_id",
+      "value": ""
+    },
+    {
+      "key": "api_object",
+      "value": ""
+    },
+    {
+      "key": "api_update_body",
+      "value": ""
+    },
+    {
+      "key": "publist_retry",
+      "value": ""
+    },
+    {
+      "key": "skipped_list",
+      "value": ""
+    },
+    {
+      "key": "old_throttle_policy_id",
+      "value": ""
+    },
+    {
+      "key": "api_object_now",
+      "value": ""
+    },
+    {
+      "key": "api_attach_body",
+      "value": ""
+    }
+  ]
+}
