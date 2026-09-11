@@ -11,7 +11,7 @@ deploy, subscribe, invoke, revoke, and tear down — and removes everything it c
 | | |
 |---|---|
 | Checks per run | **90 assertions across 67 requests** |
-| Typical runtime | **13–16 seconds** |
+| Typical runtime (In Local environment) | **13–16 seconds** |
 | Runs as | A least-privilege user (no admin rights at runtime) |
 | Leaves behind | Nothing — all artifacts are deleted by the suite |
 
