@@ -4,8 +4,10 @@ reports/*.json
 # Backups created by bootstrap-client.sh (may contain credentials)
 *.orig
 
-# Never commit a populated environment: it holds client_secret and admin_pass.
-# Copy the template, fill it in locally, and keep your copy out of git.
-*-local.postman_environment.json
+# Your filled-in environment. The committed file is a TEMPLATE with blank
+# credentials; copy it to <something>.local.json, fill that in, and run against
+# it. A populated environment holds client_secret and admin_pass in plain text
+# and must never be committed.
+*.local.json
 
 .DS_Store
