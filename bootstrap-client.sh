@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# bootstrap-client.sh -- ONE-TIME admin setup for the MET_OFFICE smoke suite
+# bootstrap-client.sh -- ONE-TIME admin setup for the smoke test suite
 #
 # Registers the OAuth client the suite uses and writes client_id/client_secret
 # into a Postman environment file. Run once, by an admin, before the suite is
@@ -11,10 +11,11 @@
 # a maintenance window.
 #
 #   ./bootstrap-client.sh --host localhost --port 9443 \
-#       --admin-user admin --env APIM-4.5.0-Local-LeastPriv.postman_environment.json
+#       --env APIM-4.5.0-Local-LeastPriv.postman_environment.json
 #
-# The admin password is prompted for, never taken from a file and never written
-# to one. Only client_id/client_secret are persisted.
+# The admin USERNAME and PASSWORD are both prompted for -- deployments do not
+# share an admin account, and neither is taken from a file or written to one.
+# Only client_id/client_secret are persisted.
 # =============================================================================
 set -uo pipefail
 cd "$(dirname "$0")"
@@ -24,13 +25,15 @@ DCR_VERSION="v0.17"
 
 usage() {
   cat <<USAGE
-usage: $0 --host <h> --port <p> --admin-user <u> --env <environment.json>
-          [--owner <username>] [--dcr-version v0.17]
+usage: $0 --host <h> --port <p> --env <environment.json>
+          [--admin-user <u>] [--owner <username>] [--dcr-version v0.17]
 
   --host         Control Plane host (e.g. localhost)
   --port         Control Plane port (e.g. 9443)
-  --admin-user   Admin username used to register the client (password prompted)
   --env          Postman environment JSON to write client_id/client_secret into
+  --admin-user   Admin username used to register the client. PROMPTED if not
+                 given -- pass it only for unattended use. The password is
+                 always prompted and is never accepted as a flag.
   --owner        Owner recorded on the client. Defaults to --admin-user.
                  The clientName is derived as smoke_client_<owner>, matching
                  what the collection used to register, so an existing client is
@@ -52,10 +55,19 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -n "$HOST" && -n "$PORT" && -n "$ADMIN_USER" && -n "$ENVFILE" ]] || usage
+[[ -n "$HOST" && -n "$PORT" && -n "$ENVFILE" ]] || usage
 command -v jq >/dev/null || { echo "ERROR: jq is required but not installed (brew install jq)"; exit 2; }
 [[ -f "$ENVFILE" ]] || { echo "ERROR: environment file not found: $ENVFILE"; exit 2; }
 jq -e . "$ENVFILE" >/dev/null 2>&1 || { echo "ERROR: $ENVFILE is not valid JSON"; exit 2; }
+
+# Admin identity is asked for, not configured: each deployment has its own admin
+# username, and it is NOT the least-privilege account in admin_user that the
+# suite itself runs as.
+if [[ -z "$ADMIN_USER" ]]; then
+  printf "Admin username (for client registration): " >&2
+  read -r ADMIN_USER
+fi
+[[ -n "$ADMIN_USER" ]] || { echo "ERROR: admin username is required"; exit 2; }
 
 [[ -n "$CLIENT_OWNER" ]] || CLIENT_OWNER="$ADMIN_USER"
 CLIENT_NAME="smoke_client_${CLIENT_OWNER}"

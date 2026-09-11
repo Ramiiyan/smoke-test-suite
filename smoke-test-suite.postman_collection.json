@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "d6dabf39-1768-4816-90bf-95844c097bae",
-    "name": "MET_OFFICE",
+    "name": "smoke-test-suite",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "56436052",
     "_collection_link": "https://go.postman.co/collection/56436052-d6dabf39-1768-4816-90bf-95844c097bae?source=collection_link"

@@ -2,8 +2,8 @@
 
 A Postman/Newman suite that verifies a **WSO2 API Manager 4.5.0 distributed deployment**
 is healthy and functional. It is designed to be run **immediately before and immediately
-after any maintenance activity** — keep both reports and compare them, so a regression is
-caught within minutes rather than discovered by a customer.
+after any maintenance activity** — compare the two runs, so a regression is caught within
+minutes rather than discovered by a customer.
 
 The suite exercises a complete API lifecycle against a live deployment — create, publish,
 deploy, subscribe, invoke, revoke, and tear down — and removes everything it creates.
@@ -143,38 +143,39 @@ which maps directly onto the inline log.
 
 - WSO2 API Manager **4.5.0** distributed: Control Plane, Universal Gateway, Traffic Manager
 - All three nodes running and reachable
-- A gateway environment registered (default name `Default`)
+- A gateway environment registered (stock name `Default` — set `gw_env_name` to yours)
 - A user account for the suite to run as, with the role described in section 6
-- Network access from the gateway to the backend used by the test API
-  (default `https://httpbin.org` — change `backend_url` if the deployment is air-gapped)
+- Network access from the gateway to the backend used by the test API. `backend_url` must
+  point at something the **gateway node** can reach; if the deployment is air-gapped,
+  set it to an internal service that answers `GET /get`
 
-### Default ports
+### Stock ports
 
-| Node | Port |
-|---|---|
-| Control Plane (Publisher / DevPortal / Admin APIs) | 9443 |
-| Universal Gateway (HTTPS) | 8244 |
-| Traffic Manager | 9445 |
+These are the out-of-the-box values. **Confirm them against your own deployment** — a port
+offset, a reverse proxy or a load balancer changes them, and section 6 asks you to set the
+two the suite uses.
+
+| Node | Stock port | Used by the suite |
+|---|---|---|
+| Control Plane (Publisher / DevPortal / Admin APIs) | 9443 | yes — `cp_port` |
+| Universal Gateway (HTTPS) | 8244 | yes — `gw_port` |
+| Traffic Manager | 9445 | no — contacted by the gateway, not by the suite |
 
 ---
 
 ## 3. Repository structure
 
 ```
-MET_OFFICE/
+<suite-directory>/
 ├── README.md                                        this file
-├── MET_OFFICE.postman_collection.json               the suite (67 requests)
-├── DEMO-broken.postman_collection.json              deliberately broken copy, for demos
-├── APIM-4.5.0-Local.postman_environment.json        environment template (fill in locally)
-│
+├── smoke-test-suite.postman_collection.json          the suite (67 requests)
+├── APIM-4.5.0-Local.postman_environment.json        environment TEMPLATE -- copy, do not edit
+├── working.local.json                               your filled-in copy -- you create this (section 6)
 ├── bootstrap-client.sh                              ONE-TIME admin setup (section 4)
-├── seed-leftover.sh                                 demo helper: plants leftovers to show recovery
 │
-├── policy-files/                                    REQUIRED at runtime
-│   ├── policy-spec.json                             uploaded by the operation-policy test
-│   └── policy-definition.j2
-│
-└── reports/                                         Newman JSON reports land here
+└── policy-files/                                    REQUIRED at runtime
+    ├── policy-spec.json                             uploaded by the operation-policy test
+    └── policy-definition.j2
 ```
 
 > **`policy-files/` must stay next to the collection.** The operation-policy test uploads
@@ -190,27 +191,31 @@ runtime user does not have, and provisioning a client on a live system minutes b
 maintenance window is undesirable.
 
 Instead, an administrator registers the client **once** and the credentials are written
-into the environment file.
+into your copy of the environment file.
 
 ```bash
-cd MET_OFFICE
+cd <suite-directory>
+
+cp APIM-4.5.0-Local.postman_environment.json working.local.json
 
 ./bootstrap-client.sh \
-  --host localhost \
-  --port 9443 \
-  --admin-user admin \
-  --env APIM-4.5.0-Local.postman_environment.json
+  --host <control-plane-host> \
+  --port <control-plane-port> \
+  --env working.local.json
 ```
 
-You will be prompted for the admin password. It is **never written to disk** — only
+You are prompted for the **admin username and password**. Deployments do not share an
+admin account, so neither is baked into the command. Neither is written to disk — only
 `client_id` and `client_secret` are stored.
 
 Expected output:
 
 ```
--- registering 'smoke_client_admin' (owner admin) at https://localhost:9443
--- backup: APIM-4.5.0-Local.postman_environment.json.orig
--- wrote client_id / client_secret to APIM-4.5.0-Local.postman_environment.json
+Admin username (for client registration): wso2admin
+Password for wso2admin:
+-- registering 'smoke_client_wso2admin' (owner wso2admin) at https://<control-plane-host>:<port>
+-- backup: working.local.json.orig
+-- wrote client_id / client_secret to working.local.json
    client_id   : <your-generated-client-id>
 ```
 
@@ -219,31 +224,29 @@ Notes:
 - **Safe to re-run.** WSO2's DCR endpoint is get-or-create, so repeating this returns the
   same client rather than creating a duplicate.
 - Re-run it if the Key Manager is rebuilt or the client is deleted.
-- Before running, open the environment file and set `admin_user` / `admin_pass` to the
-  account the suite should run as (section 6).
+- `--admin-user <u>` skips the username prompt for unattended use. The password is always
+  prompted and is never accepted as a flag.
+- Before running the suite, open your `working.local.json` and fill in the rest of the
+  values — host, gateway, and the account the suite runs as (section 6).
 
 ---
 
 ## 5. Running the suite
 
 ```bash
-cd MET_OFFICE
+cd <suite-directory>
 
-newman run MET_OFFICE.postman_collection.json \
-  -e APIM-4.5.0-Local.postman_environment.json \
+newman run smoke-test-suite.postman_collection.json \
+  -e working.local.json \
   --insecure \
-  --working-dir . \
-  --reporters cli,json \
-  --reporter-json-export "reports/run-$(date +%Y%m%d-%H%M%S).json"
+  --working-dir .
 ```
 
 | Flag | Why it is required |
 |---|---|
-| `-e` | The environment file. Without it every `{{variable}}` resolves empty and the run collapses |
+| `-e` | Your filled-in environment copy (section 6). Without it every `{{variable}}` resolves empty and the run collapses |
 | `--insecure` | Accepts the self-signed certificates WSO2 ships with. Omit only if the deployment has trusted certificates |
 | `--working-dir .` | Resolves `policy-files/` for the multipart upload. Without it two policy requests fail |
-| `--reporters cli,json` | Prints to the terminal **and** writes a machine-readable report |
-| `--reporter-json-export` | Where that report goes. The timestamp keeps each run instead of overwriting |
 
 ### A healthy run ends with
 
@@ -254,55 +257,61 @@ newman run MET_OFFICE.postman_collection.json \
 
 **Read both numbers.** `0 failed` alone is not sufficient — see section 8.
 
-### The report
-
-Each run writes `reports/run-<timestamp>.json` — the full result: every request,
-response code, timing, assertion and failure.
-
-To compare two runs, keep both files and diff the summary:
-
-```bash
-for f in reports/run-*.json; do
-  python3 -c "
-import json,sys
-d=json.load(open('$f'))
-s=d['run']['stats']['assertions']
-print(f\"$f  checks={s['total']:<4} failed={s['failed']}\")"
-done
-```
-
-Drop `--reporters cli,json --reporter-json-export ...` if you only want terminal
-output.
-
 ## 6. Environment variables
 
-Set these in the environment JSON before the first run.
+Set these in your environment file before the first run.
+
+> **Copy it first.** The committed file is a template. Copy it to a name ending in
+> `.local.json` — for example `working.local.json` — and edit *that*. `*.local.json` is
+> gitignored, so your filled-in copy with its password and client secret can never be
+> committed. Run against the copy, not the template.
 
 ### Must be reviewed for your deployment
 
-| Variable | Example | Description |
+**Every value below must be checked against your own deployment.** `<...>` marks a
+placeholder — replace the whole thing, angle brackets included. The values in brackets
+after each one are what a stock single-node 4.5.0 uses, and are a reasonable starting
+point, but none of them are safe to assume.
+
+| Variable | Set it to | Notes |
 |---|---|---|
-| `cp_host` / `cp_port` | `localhost` / `9443` | Control Plane |
-| `gw_host` / `gw_port` | `localhost` / `8244` | Universal Gateway (HTTPS) |
-| `admin_user` / `admin_pass` | `smoke_user` / … | The account the suite runs as. **Not** an administrator |
-| `gw_env_name` | `Default` | Primary gateway environment name |
-| `vhost` | `localhost` | Virtual host used when deploying revisions |
-| `backend_url` | `https://httpbin.org` | Backend the test API points at. Must be reachable **from the gateway node** |
+| `cp_host` | `<control-plane-host>` | Hostname or IP of the Control Plane *(stock: `localhost`)* |
+| `cp_port` | `<control-plane-port>` | Control Plane HTTPS port *(stock: `9443`)*. Different if the deployment runs with a port offset, or behind a load balancer or reverse proxy |
+| `gw_host` | `<gateway-host>` | Hostname or IP of the Universal Gateway *(stock: `localhost`)*. Often, but not always, the same as `cp_host` |
+| `gw_port` | `<gateway-port>` | Gateway HTTPS port *(stock: `8244`)*. Same caveat as `cp_port` |
+| `vhost` | `<gateway-vhost>` | Virtual host the revision is deployed on *(stock: `localhost`)*. Usually the same value as `gw_host`. Must match a vhost registered on the gateway environment |
+| `gw_env_name` | `<gateway-environment>` | Gateway environment name **exactly as registered** in Admin Portal → Gateways *(stock: `Default`)* |
+| `admin_user` | `<runtime-username>` | The account the suite runs as |
+| `admin_pass` | `<runtime-password>` | That account's password |
+| `backend_url` | `<backend-url>` | Backend the test API proxies *(example: `https://httpbin.org`)*. Must be reachable **from the gateway node** — if that host has no outbound internet access, point this at any internal HTTP service that answers `GET /get` |
+
+> **The ports matter as much as the hosts.** A deployment behind a reverse proxy, or one
+> started with a port offset, exposes neither `9443` nor `8244`. Confirm both before the
+> first run — a wrong port fails every request with a connection error, not a clear
+> message.
+
+> **`admin_user` is not an administrator.** The name is historical. It is the
+> **least-privilege** account the suite runs as, and it needs exactly the scopes listed
+> below — nothing more. It is *not* the admin account `bootstrap-client.sh` prompts for;
+> that one is only used to register the OAuth client and is never stored anywhere.
 
 ### Test artifact names — change only if they clash
 
-| Variable | Default | Description |
-|---|---|---|
-| `api_name` | `SMOKE_FixedTest1` | Name of the API the suite creates |
-| `api_context` | `smoke-fixed-1` | Its context path |
-| `api_version` | `1.0.0` | Its version |
+The suite creates, verifies and deletes these on every run. Change them only if something
+with the same name already exists on the deployment.
 
-### Written automatically — do not edit by hand
+| Variable | Default | Notes |
+|---|---|---|
+| `api_name` | `SMOKE_FixedTest1` | **Keep the `SMOKE` prefix.** It is what scopes every delete in the suite (section 8) |
+| `api_context` | `smoke-fixed-1` | Context path. Must be unique across the deployment |
+| `api_version` | `1.0.0` | |
+
+### Written automatically — leave blank, do not edit by hand
 
 | Variable | Set by |
 |---|---|
-| `client_id` / `client_secret` | `bootstrap-client.sh` |
-| `expected_client_id` | The suite, on first run (see section 8) |
+| `client_id` / `client_secret` | `bootstrap-client.sh` (section 4) |
+| `expected_client_id` | The suite, on its first run. It pins the client id and compares it every run after — see section 8 |
 
 ### Required role and scopes
 
@@ -400,8 +409,10 @@ WHERE REG_PATH_VALUE LIKE '%/applicationdata/provider/%';
 ```
 
 **The environment file contains credentials.**
-`admin_pass` and `client_secret` are stored in plain text. Treat the environment JSON as a
-secrets file: restrict its permissions and keep it out of version control.
+`admin_pass` and `client_secret` are stored in plain text. Treat your filled-in copy as a
+secrets file: `chmod 600` it, and keep the `.local.json` name so the gitignore rule covers
+it. `bootstrap-client.sh` also leaves a `.orig` backup holding the same values — that is
+covered by the `*.orig` rule.
 
 ---
 
@@ -409,7 +420,8 @@ secrets file: restrict its permissions and keep it out of version control.
 
 | Symptom | Cause and fix |
 |---|---|
-| `client_id/client_secret are missing from the environment` and the run stops after one request | `bootstrap-client.sh` has not been run for this environment file. See section 4 |
+| `client_id/client_secret are missing from the environment` and the run stops after one request | `bootstrap-client.sh` has not been run against this environment file. See section 4 |
+| Every request fails against `localhost` when your deployment is elsewhere | `cp_host` / `gw_host` were left at the template defaults. See section 6 |
 | Two policy requests fail with a file-not-found error | `--working-dir .` was omitted, or `policy-files/` is missing |
 | Every request fails with a TLS error | `--insecure` was omitted |
 | `7.1.1 Create Throttling Policy` returns **401** | The runtime role lacks `apim:tier_manage`. See section 6 |
