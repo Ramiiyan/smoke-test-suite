@@ -1,0 +1,11 @@
+# Newman reports - regenerated every run, ~2 MB each
+reports/*.json
+
+# Backups created by bootstrap-client.sh (may contain credentials)
+*.orig
+
+# Never commit a populated environment: it holds client_secret and admin_pass.
+# Copy the template, fill it in locally, and keep your copy out of git.
+*-local.postman_environment.json
+
+.DS_Store
