@@ -1,10 +1,9 @@
 {
   "info": {
-    "_postman_id": "d6dabf39-1768-4816-90bf-95844c097bae",
+    "_postman_id": "5d23b270-7627-4fe5-8708-08c54fbecab9",
     "name": "smoke-test-suite",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "56436052",
-    "_collection_link": "https://go.postman.co/collection/56436052-d6dabf39-1768-4816-90bf-95844c097bae?source=collection_link"
+    "_exporter_id": "17531453"
   },
   "item": [
     {
@@ -581,6 +580,16 @@
             }
           ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_subscribe}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
             "header": [],
             "url": {
@@ -597,16 +606,6 @@
                 "v3",
                 "applications",
                 "{{old_app_id}}"
-              ]
-            },
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token_subscribe}}",
-                  "type": "string"
-                }
               ]
             }
           },
@@ -828,7 +827,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// may already be CREATED \u2014 not a failure\npm.test(\"Demoted or already created\", () => pm.expect(pm.response.code).to.be.oneOf([200, 400, 500]));"
+                  "// may already be CREATED — not a failure\npm.test(\"Demoted or already created\", () => pm.expect(pm.response.code).to.be.oneOf([200, 400, 500]));"
                 ]
               }
             }
@@ -907,6 +906,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -914,8 +914,7 @@
                 "v4",
                 "apis",
                 "{{old_api_id}}"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -966,6 +965,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -974,8 +974,7 @@
                 "throttling",
                 "policies",
                 "advanced"
-              ],
-              "port": "{{cp_port}}"
+              ]
             },
             "description": "Removes a SMOKE_ throttling policy left behind by an interrupted run. Needs apim:tier_view."
           },
@@ -1030,6 +1029,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -1039,8 +1039,7 @@
                 "policies",
                 "advanced",
                 "{{old_throttle_policy_id}}"
-              ],
-              "port": "{{cp_port}}"
+              ]
             },
             "description": "Deletes only a SMOKE_-prefixed policy found by the previous request."
           },
@@ -1104,14 +1103,14 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
                 "publisher",
                 "v4",
                 "apis"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -1225,6 +1224,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -1232,7 +1232,6 @@
                 "v4",
                 "apis"
               ],
-              "port": "{{cp_port}}",
               "query": [
                 {
                   "key": "limit",
@@ -1291,6 +1290,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -1298,7 +1298,6 @@
                 "v4",
                 "operation-policies"
               ],
-              "port": "{{cp_port}}",
               "query": [
                 {
                   "key": "limit",
@@ -1362,6 +1361,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -1369,8 +1369,7 @@
                 "v4",
                 "throttling-policies",
                 "subscription"
-              ],
-              "port": "{{cp_port}}"
+              ]
             },
             "description": "Inventory check: subscription-level throttling tiers visible to the Publisher. Requires apim:tier_view (carried by {{token_tier}}). Note /throttling-policies/advanced is NOT exposed here -- advanced tiers are admin-only and 404 on the Publisher API."
           },
@@ -1435,22 +1434,6 @@
             },
             "method": "PUT",
             "header": [],
-            "url": {
-              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
-              "protocol": "https",
-              "host": [
-                "{{cp_host}}"
-              ],
-              "path": [
-                "api",
-                "am",
-                "publisher",
-                "v4",
-                "apis",
-                "{{api_id}}"
-              ],
-              "port": "{{cp_port}}"
-            },
             "body": {
               "mode": "raw",
               "raw": "{{api_update_body}}",
@@ -1459,6 +1442,22 @@
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}"
+              ]
             }
           },
           "response": []
@@ -1637,6 +1636,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -1645,8 +1645,7 @@
                 "apis",
                 "{{api_id}}",
                 "revisions"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -1764,23 +1763,6 @@
             },
             "method": "POST",
             "header": [],
-            "url": {
-              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents",
-              "protocol": "https",
-              "host": [
-                "{{cp_host}}"
-              ],
-              "path": [
-                "api",
-                "am",
-                "publisher",
-                "v4",
-                "apis",
-                "{{api_id}}",
-                "documents"
-              ],
-              "port": "{{cp_port}}"
-            },
             "body": {
               "mode": "raw",
               "raw": "{\n    \"name\": \"SMOKE_Doc\",\n    \"type\": \"HOWTO\",\n    \"summary\": \"Smoke test document\",\n    \"sourceType\": \"INLINE\",\n    \"visibility\": \"API_LEVEL\"\n}",
@@ -1789,6 +1771,23 @@
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "api",
+                "am",
+                "publisher",
+                "v4",
+                "apis",
+                "{{api_id}}",
+                "documents"
+              ]
             }
           },
           "response": []
@@ -1849,6 +1848,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -1858,8 +1858,7 @@
                 "{{api_id}}",
                 "documents",
                 "{{document_id}}"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -1915,12 +1914,22 @@
             },
             "method": "PUT",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"documentId\": \"{{document_id}}\",\n    \"name\": \"SMOKE_Doc\",\n    \"type\": \"HOWTO\",\n    \"summary\": \"Updated by smoke suite\",\n    \"sourceType\": \"INLINE\",\n    \"visibility\": \"API_LEVEL\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/documents/{{document_id}}",
               "protocol": "https",
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -1930,17 +1939,7 @@
                 "{{api_id}}",
                 "documents",
                 "{{document_id}}"
-              ],
-              "port": "{{cp_port}}"
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"documentId\": \"{{document_id}}\",\n    \"name\": \"SMOKE_Doc\",\n    \"type\": \"HOWTO\",\n    \"summary\": \"Updated by smoke suite\",\n    \"sourceType\": \"INLINE\",\n    \"visibility\": \"API_LEVEL\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              ]
             }
           },
           "response": []
@@ -1995,6 +1994,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -2004,8 +2004,7 @@
                 "{{api_id}}",
                 "documents",
                 "{{document_id}}"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -2062,6 +2061,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -2071,8 +2071,7 @@
                 "{{api_id}}",
                 "documents",
                 "{{document_id}}"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -2183,6 +2182,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -2190,7 +2190,6 @@
                 "v3",
                 "applications"
               ],
-              "port": "{{cp_port}}",
               "query": [
                 {
                   "key": "limit",
@@ -2309,6 +2308,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -2316,7 +2316,6 @@
                 "v3",
                 "apis"
               ],
-              "port": "{{cp_port}}",
               "query": [
                 {
                   "key": "query",
@@ -2371,6 +2370,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -2378,7 +2378,6 @@
                 "v3",
                 "apis"
               ],
-              "port": "{{cp_port}}",
               "query": [
                 {
                   "key": "limit",
@@ -2490,6 +2489,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -2497,7 +2497,6 @@
                 "v3",
                 "subscriptions"
               ],
-              "port": "{{cp_port}}",
               "query": [
                 {
                   "key": "apiId",
@@ -2819,12 +2818,12 @@
               "host": [
                 "{{gw_host}}"
               ],
+              "port": "{{gw_port}}",
               "path": [
                 "{{api_context}}",
                 "{{api_version}}",
                 "get"
-              ],
-              "port": "{{gw_port}}"
+              ]
             }
           },
           "response": []
@@ -2902,7 +2901,7 @@
                   "    });",
                   "} else if (n < MAX) {",
                   "    pm.collectionVariables.set(\"retry_count\", n + 1);",
-                  "    // crude sleep \u2014 the Postman sandbox has no real blocking wait",
+                  "    // crude sleep — the Postman sandbox has no real blocking wait",
                   "    const t = Date.now();",
                   "    while (Date.now() - t < 2000) { /* wait 2s */ }",
                   "    pm.execution.setNextRequest(\"6.4 Invoke with Revoked Token\");",
@@ -2911,7 +2910,7 @@
                   "    pm.test(\"Revoked token rejected by gateway\", function () {",
                   "        pm.expect.fail(",
                   "          \"Last status \" + pm.response.code + \" after \" + MAX + \" attempts. The tokenRevocation JMS \" +",
-                  "          \"event is not reaching this gateway \u2014 check the TM JMS topic and the \" +",
+                  "          \"event is not reaching this gateway — check the TM JMS topic and the \" +",
                   "          \"gateway event listener config.\"",
                   "        );",
                   "    });",
@@ -2939,12 +2938,12 @@
               "host": [
                 "{{gw_host}}"
               ],
+              "port": "{{gw_port}}",
               "path": [
                 "{{api_context}}",
                 "{{api_version}}",
                 "get"
-              ],
-              "port": "{{gw_port}}"
+              ]
             }
           },
           "response": []
@@ -2994,23 +2993,6 @@
                 },
                 "method": "POST",
                 "header": [],
-                "url": {
-                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced",
-                  "protocol": "https",
-                  "host": [
-                    "{{cp_host}}"
-                  ],
-                  "path": [
-                    "api",
-                    "am",
-                    "admin",
-                    "v4",
-                    "throttling",
-                    "policies",
-                    "advanced"
-                  ],
-                  "port": "{{cp_port}}"
-                },
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"policyName\": \"SMOKE_Throttle\",\n    \"displayName\": \"SMOKE_Throttle\",\n    \"description\": \"Operational smoke test throttling policy. Safe to delete.\",\n    \"conditionalGroups\": [],\n    \"defaultLimit\": {\n        \"type\": \"REQUESTCOUNTLIMIT\",\n        \"requestCount\": {\n            \"timeUnit\": \"min\",\n            \"unitTime\": 1,\n            \"requestCount\": 1000\n        }\n    }\n}",
@@ -3019,6 +3001,23 @@
                       "language": "json"
                     }
                   }
+                },
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/admin/v4/throttling/policies/advanced",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "port": "{{cp_port}}",
+                  "path": [
+                    "api",
+                    "am",
+                    "admin",
+                    "v4",
+                    "throttling",
+                    "policies",
+                    "advanced"
+                  ]
                 }
               },
               "response": []
@@ -3078,6 +3077,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3085,8 +3085,7 @@
                     "v4",
                     "apis",
                     "{{api_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 },
                 "description": "Fetches the live API object so the attach PUT sends current state."
               },
@@ -3149,23 +3148,6 @@
                 },
                 "method": "PUT",
                 "header": [],
-                "url": {
-                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
-                  "protocol": "https",
-                  "host": [
-                    "{{cp_host}}"
-                  ],
-                  "path": [
-                    "api",
-                    "am",
-                    "publisher",
-                    "v4",
-                    "apis",
-                    "{{api_id}}"
-                  ],
-                  "port": "{{cp_port}}"
-                },
-                "description": "Attaches the advanced throttling policy by setting apiThrottlingPolicy. The API is PUBLISHED here, so this needs apim:api_publish (carried by token_create).",
                 "body": {
                   "mode": "raw",
                   "raw": "{{api_attach_body}}",
@@ -3174,7 +3156,24 @@
                       "language": "json"
                     }
                   }
-                }
+                },
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "port": "{{cp_port}}",
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}"
+                  ]
+                },
+                "description": "Attaches the advanced throttling policy by setting apiThrottlingPolicy. The API is PUBLISHED here, so this needs apim:api_publish (carried by token_create)."
               },
               "response": []
             },
@@ -3237,6 +3236,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3244,8 +3244,7 @@
                     "v4",
                     "apis",
                     "{{api_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 },
                 "description": "Confirms the association persisted. Does NOT prove enforcement."
               },
@@ -3307,23 +3306,6 @@
                 },
                 "method": "PUT",
                 "header": [],
-                "url": {
-                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
-                  "protocol": "https",
-                  "host": [
-                    "{{cp_host}}"
-                  ],
-                  "path": [
-                    "api",
-                    "am",
-                    "publisher",
-                    "v4",
-                    "apis",
-                    "{{api_id}}"
-                  ],
-                  "port": "{{cp_port}}"
-                },
-                "description": "Restores the built-in Unlimited tier so the policy can be deleted.",
                 "body": {
                   "mode": "raw",
                   "raw": "{{api_attach_body}}",
@@ -3332,7 +3314,24 @@
                       "language": "json"
                     }
                   }
-                }
+                },
+                "url": {
+                  "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}",
+                  "protocol": "https",
+                  "host": [
+                    "{{cp_host}}"
+                  ],
+                  "port": "{{cp_port}}",
+                  "path": [
+                    "api",
+                    "am",
+                    "publisher",
+                    "v4",
+                    "apis",
+                    "{{api_id}}"
+                  ]
+                },
+                "description": "Restores the built-in Unlimited tier so the policy can be deleted."
               },
               "response": []
             },
@@ -3392,6 +3391,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3401,8 +3401,7 @@
                     "policies",
                     "advanced",
                     "{{throttle_policy_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 }
               },
               "response": []
@@ -3457,6 +3456,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3466,8 +3466,7 @@
                     "policies",
                     "advanced",
                     "{{throttle_policy_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 }
               },
               "response": []
@@ -3523,6 +3522,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3532,8 +3532,7 @@
                     "policies",
                     "advanced",
                     "{{throttle_policy_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 }
               },
               "response": []
@@ -3596,12 +3595,29 @@
                 },
                 "method": "POST",
                 "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "policySpecFile",
+                      "type": "file",
+                      "contentType": "application/json",
+                      "src": "policy-files/policy-spec.json"
+                    },
+                    {
+                      "key": "synapsePolicyDefinitionFile",
+                      "type": "file",
+                      "src": "policy-files/policy-definition.j2"
+                    }
+                  ]
+                },
                 "url": {
                   "raw": "https://{{cp_host}}:{{cp_port}}/api/am/publisher/v4/apis/{{api_id}}/operation-policies",
                   "protocol": "https",
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3610,23 +3626,6 @@
                     "apis",
                     "{{api_id}}",
                     "operation-policies"
-                  ],
-                  "port": "{{cp_port}}"
-                },
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "policySpecFile",
-                      "type": "file",
-                      "src": "policy-files/policy-spec.json",
-                      "contentType": "application/json"
-                    },
-                    {
-                      "key": "synapsePolicyDefinitionFile",
-                      "type": "file",
-                      "src": "policy-files/policy-definition.j2"
-                    }
                   ]
                 }
               },
@@ -3688,6 +3687,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3697,8 +3697,7 @@
                     "{{api_id}}",
                     "operation-policies",
                     "{{op_policy_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 }
               },
               "response": []
@@ -3753,6 +3752,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3762,8 +3762,7 @@
                     "{{api_id}}",
                     "operation-policies",
                     "{{op_policy_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 }
               },
               "response": []
@@ -3819,6 +3818,7 @@
                   "host": [
                     "{{cp_host}}"
                   ],
+                  "port": "{{cp_port}}",
                   "path": [
                     "api",
                     "am",
@@ -3828,8 +3828,7 @@
                     "{{api_id}}",
                     "operation-policies",
                     "{{op_policy_id}}"
-                  ],
-                  "port": "{{cp_port}}"
+                  ]
                 }
               },
               "response": []
@@ -4038,6 +4037,24 @@
         },
         {
           "name": "8.4 Undeploy Revision",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
+                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
+                  "if (!pm.collectionVariables.get(\"revision_id\")) {",
+                  "    console.log(\"SKIP Undeploy Revision: revision_id is empty\");",
+                  "    pm.collectionVariables.set(\"skipped_list\",",
+                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -4084,7 +4101,10 @@
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "8.5 Delete Revision",
           "event": [
             {
               "listen": "prerequest",
@@ -4094,7 +4114,7 @@
                   "// setNextRequest() does NOT skip the current request -- it only chooses what",
                   "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
                   "if (!pm.collectionVariables.get(\"revision_id\")) {",
-                  "    console.log(\"SKIP Undeploy Revision: revision_id is empty\");",
+                  "    console.log(\"SKIP Delete Revision: revision_id is empty\");",
                   "    pm.collectionVariables.set(\"skipped_list\",",
                   "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
                   "    pm.execution.skipRequest();",
@@ -4102,10 +4122,7 @@
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "8.5 Delete Revision",
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -4138,7 +4155,10 @@
               ]
             }
           },
-          "response": [],
+          "response": []
+        },
+        {
+          "name": "8.6 Demote to Created",
           "event": [
             {
               "listen": "prerequest",
@@ -4147,8 +4167,8 @@
                 "exec": [
                   "// setNextRequest() does NOT skip the current request -- it only chooses what",
                   "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
-                  "if (!pm.collectionVariables.get(\"revision_id\")) {",
-                  "    console.log(\"SKIP Delete Revision: revision_id is empty\");",
+                  "if (!pm.collectionVariables.get(\"api_id\")) {",
+                  "    console.log(\"SKIP Demote to Created: api_id is empty\");",
                   "    pm.collectionVariables.set(\"skipped_list\",",
                   "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
                   "    pm.execution.skipRequest();",
@@ -4156,10 +4176,7 @@
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "8.6 Demote to Created",
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -4200,25 +4217,7 @@
               ]
             }
           },
-          "response": [],
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// setNextRequest() does NOT skip the current request -- it only chooses what",
-                  "// runs next, so the guarded call still fired. skipRequest() actually skips it.",
-                  "if (!pm.collectionVariables.get(\"api_id\")) {",
-                  "    console.log(\"SKIP Demote to Created: api_id is empty\");",
-                  "    pm.collectionVariables.set(\"skipped_list\",",
-                  "        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);",
-                  "    pm.execution.skipRequest();",
-                  "}"
-                ]
-              }
-            }
-          ]
+          "response": []
         },
         {
           "name": "8.7 Delete API",
@@ -4334,6 +4333,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -4341,8 +4341,7 @@
                 "v3",
                 "subscriptions",
                 "{{subscription_id}}"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -4400,6 +4399,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -4407,8 +4407,7 @@
                 "v3",
                 "applications",
                 "{{app_id}}"
-              ],
-              "port": "{{cp_port}}"
+              ]
             }
           },
           "response": []
@@ -4439,26 +4438,7 @@
                   "// Assert NOT RETRIEVABLE rather than a strict status.",
                   "pm.test(\"API no longer retrievable\", function () {",
                   "    pm.expect(pm.response.code).to.not.be.oneOf([200]);",
-                  "});",
-                  "",
-                  "",
-                  "// ---------------------------------------------------------------------------",
-                  "// End-of-run summary. Newman's table shows failures but NOT skips, so a run can",
-                  "// report \"0 failed\" while quietly having executed far fewer checks. This prints",
-                  "// what was skipped and why, for whoever is reading the run.",
-                  "// ---------------------------------------------------------------------------",
-                  "const skipped = (pm.collectionVariables.get(\"skipped_list\") || \"\")",
-                  "                  .split(\"|\").filter(x => x.length > 0);",
-                  "console.log(\"===== RUN SUMMARY =====\");",
-                  "if (skipped.length === 0) {",
-                  "    console.log(\"SKIPPED: none -- every request executed.\");",
-                  "} else {",
-                  "    console.log(\"SKIPPED (\" + skipped.length + \") -- these did NOT run, so the check\");",
-                  "    console.log(\"count below is LOWER than a full run. Fix the failure above first:\");",
-                  "    skipped.forEach(s => console.log(\"   - \" + s));",
-                  "}",
-                  "console.log(\"========================\");",
-                  "pm.collectionVariables.unset(\"skipped_list\");"
+                  "});"
                 ]
               }
             }
@@ -4482,6 +4462,7 @@
               "host": [
                 "{{cp_host}}"
               ],
+              "port": "{{cp_port}}",
               "path": [
                 "api",
                 "am",
@@ -4489,8 +4470,197 @@
                 "v4",
                 "apis",
                 "{{api_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9_ExistingAPI",
+      "item": [
+        {
+          "name": "9.1 Generate Access Token (Existing APP)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get(\"existing_app_client_id\") || !pm.environment.get(\"existing_app_client_secret\")) {\n    console.log(\"SKIP \" + pm.info.requestName + \": existing_app_client_id/secret not set in the environment\");\n    pm.collectionVariables.set(\"skipped_list\",\n        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);\n    pm.execution.skipRequest();\n}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Existing app token issued\", function () {\n    pm.expect(pm.response.code,\n        \"expected 200 -- check existing_app_client_id/secret and that the app's grant types include client_credentials. \" +\n        \"[NOTE] this request gates 9.2 -- when it fails, 9.2 is SKIPPED.\").to.eql(200);\n});\n\nif (pm.response.code === 200) {\n    pm.collectionVariables.set(\"existing_api_token\", pm.response.json().access_token);\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{existing_app_client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{existing_app_client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                },
+                {
+                  "key": "scope",
+                  "value": "default"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/token",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
               ],
-              "port": "{{cp_port}}"
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9.2 Invoke Existing API",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"existing_api_token\")) {\n    console.log(\"SKIP \" + pm.info.requestName + \": existing_api_token is empty\");\n    pm.collectionVariables.set(\"skipped_list\",\n        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);\n    pm.execution.skipRequest();\n}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const code = pm.response.code;\nlet why = \"expected 200 but got \" + code + \". \";\nif (code === 404)      why += \"The existing API is not deployed on this gateway, or existing_api_path / vhost is wrong.\";\nelse if (code === 401) why += \"The gateway rejected the token -- check Key Manager / JWKS reachability from the gateway.\";\nelse if (code === 403) why += \"The app is not subscribed, or the subscription is not visible to the gateway.\";\nelse if (code >= 500)  why += \"The gateway served the API but the backend call failed.\";\n\npm.test(\"Existing API is served by the gateway\", function () {\n    pm.expect(code, why).to.eql(200);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{existing_api_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://{{gw_host}}:{{gw_port}}/{{existing_api_path}}",
+              "protocol": "https",
+              "host": [
+                "{{gw_host}}"
+              ],
+              "port": "{{gw_port}}",
+              "path": [
+                "{{existing_api_path}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "9.3 Revoke Existing App Token",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"existing_api_token\")) {\n    console.log(\"SKIP \" + pm.info.requestName + \": existing_api_token is empty\");\n    pm.collectionVariables.set(\"skipped_list\",\n        (pm.collectionVariables.get(\"skipped_list\") || \"\") + \"|\" + pm.info.requestName);\n\n    // A skipped request runs no post-response script, so the run summary that\n    // normally prints after the 9.3 response has to be printed here instead.\n    // ---------------------------------------------------------------------------\n    // End-of-run summary. Newman's table shows failures but NOT skips, so a run can\n    // report \"0 failed\" while quietly having executed far fewer checks. This prints\n    // what was skipped and why, for whoever is reading the run.\n    // ---------------------------------------------------------------------------\n    const skipped = (pm.collectionVariables.get(\"skipped_list\") || \"\")\n                      .split(\"|\").filter(x => x.length > 0);\n    console.log(\"===== RUN SUMMARY =====\");\n    if (skipped.length === 0) {\n        console.log(\"SKIPPED: none -- every request executed.\");\n    } else {\n        console.log(\"SKIPPED (\" + skipped.length + \") -- these did NOT run, so the check\");\n        console.log(\"count below is LOWER than a full run. Fix the failure above first:\");\n        skipped.forEach(s => console.log(\"   - \" + s));\n    }\n    console.log(\"========================\");\n    pm.collectionVariables.unset(\"skipped_list\");\n\n    pm.execution.skipRequest();\n}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Existing app token revoked\", function () {\n    pm.expect(pm.response.code,\n        \"expected 200 -- check existing_app_client_id/secret; the revoke must use the same client that issued the token.\")\n      .to.eql(200);\n});\n\npm.collectionVariables.unset(\"existing_api_token\");\n\n// ---------------------------------------------------------------------------\n// End-of-run summary. Newman's table shows failures but NOT skips, so a run can\n// report \"0 failed\" while quietly having executed far fewer checks. This prints\n// what was skipped and why, for whoever is reading the run.\n// ---------------------------------------------------------------------------\nconst skipped = (pm.collectionVariables.get(\"skipped_list\") || \"\")\n                  .split(\"|\").filter(x => x.length > 0);\nconsole.log(\"===== RUN SUMMARY =====\");\nif (skipped.length === 0) {\n    console.log(\"SKIPPED: none -- every request executed.\");\n} else {\n    console.log(\"SKIPPED (\" + skipped.length + \") -- these did NOT run, so the check\");\n    console.log(\"count below is LOWER than a full run. Fix the failure above first:\");\n    skipped.forEach(s => console.log(\"   - \" + s));\n}\nconsole.log(\"========================\");\npm.collectionVariables.unset(\"skipped_list\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{existing_app_client_id}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{existing_app_client_secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "token",
+                  "value": "{{existing_api_token}}"
+                },
+                {
+                  "key": "token_type_hint",
+                  "value": "access_token"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://{{cp_host}}:{{cp_port}}/oauth2/revoke",
+              "protocol": "https",
+              "host": [
+                "{{cp_host}}"
+              ],
+              "port": "{{cp_port}}",
+              "path": [
+                "oauth2",
+                "revoke"
+              ]
             }
           },
           "response": []
@@ -4662,6 +4832,10 @@
     {
       "key": "api_attach_body",
       "value": ""
+    },
+    {
+      "key": "existing_api_token",
+      "secret": true
     }
   ]
 }

@@ -11,3 +11,7 @@ reports/*.json
 *.local.json
 
 .DS_Store
+
+# Postman app local workspace files (created when this folder is opened in Postman)
+.postman/
+postman/

@@ -10,7 +10,7 @@ deploy, subscribe, invoke, revoke, and tear down — and removes everything it c
 
 | | |
 |---|---|
-| Checks per run | **90 assertions across 67 requests** |
+| Checks per run | **93 assertions across 70 requests** |
 | Typical runtime (In Local environment) | **13–16 seconds** |
 | Runs as | A least-privilege user (no admin rights at runtime) |
 | Leaves behind | Nothing — all artifacts are deleted by the suite |
@@ -29,6 +29,7 @@ deploy, subscribe, invoke, revoke, and tear down — and removes everything it c
 | **6_Gateway** | 4 | Obtain an access token, invoke the API through the gateway, revoke the token, confirm the gateway then rejects it |
 | **7_Policy** | 12 | Throttling policy create → **attach to API** → verify → detach → delete; operation policy create → verify → delete |
 | **8_Teardown** | 10 | Removes the subscription, application, revision and API, then confirms each is gone |
+| **9_ExistingAPI** | 3 | A pre-existing application obtains a token, an already-deployed API is invoked through the gateway, and the token is revoked. Read-only: creates nothing |
 
 ### Full collection tree
 
@@ -114,6 +115,10 @@ which maps directly onto the inline log.
     8.8 Verify Subscription Deleted
     8.9 Verify Application Deleted
     8.10 Verify API Deleted
+9_ExistingAPI/
+    9.1 Generate Access Token (Existing APP)
+    9.2 Invoke Existing API
+    9.3 Revoke Existing App Token
 ```
 
 ### What it deliberately does **not** cover
@@ -125,6 +130,9 @@ which maps directly onto the inline log.
 - **High availability / failover.** The suite checks one gateway environment; it does not
   test failover between gateway nodes.
 - **Performance.** This is a functional smoke suite, not a load test.
+- **Gateway sync, in `9_ExistingAPI`.** 9.2 proves an *already-deployed* API is served by the
+  gateway. A gateway loads deployed APIs at startup, so 9.2 can pass even when the Control
+  Plane can no longer push changes to it. That is covered by `6.2` and `6.4`, not by 9.x.
 
 ---
 
@@ -168,7 +176,7 @@ two the suite uses.
 ```
 <suite-directory>/
 ├── README.md                                        this file
-├── smoke-test-suite.postman_collection.json          the suite (67 requests)
+├── smoke-test-suite.postman_collection.json          the suite (70 requests)
 ├── APIM-4.5.0-Local.postman_environment.json        environment TEMPLATE -- copy, do not edit
 ├── working.local.json                               your filled-in copy -- you create this (section 6)
 ├── bootstrap-client.sh                              ONE-TIME admin setup (section 4)
@@ -251,7 +259,7 @@ newman run smoke-test-suite.postman_collection.json \
 ### A healthy run ends with
 
 ```
-│              assertions │  90 │  0 │
+│              assertions │  93 │  0 │
 │ total run duration: 13.9s              │
 ```
 
@@ -306,6 +314,24 @@ with the same name already exists on the deployment.
 | `api_context` | `smoke-fixed-1` | Context path. Must be unique across the deployment |
 | `api_version` | `1.0.0` | |
 
+### Existing API check — `9_ExistingAPI`
+
+The folder invokes an API that already exists on the deployment, using an application that
+is already subscribed to it. The suite only reads them; it never creates, changes or deletes
+either one. Leave the two credentials blank to skip the folder (the run then reports 90
+assertions and lists 9.1–9.3 as SKIPPED).
+
+| Variable | Set it to | Notes |
+|---|---|---|
+| `existing_api_path` | `<context>/<version>` | Path after the gateway host, no leading slash *(default: `wso2_main_gateway_health_check_api/v1`)* |
+| `existing_app_client_id` | `<consumer-key>` | Consumer key of an application subscribed to that API. Its grant types must include **Client Credentials** |
+| `existing_app_client_secret` | `<consumer-secret>` | That application's consumer secret |
+
+> **Use an application dedicated to this check.** 9.1 issues a token for the application and
+> 9.3 revokes it. Unless `renew_token_without_revoking_existing` is enabled, issuing a new
+> token can revoke the application's previously active token — so do not point this at an
+> application that real consumers use.
+
 ### Written automatically — leave blank, do not edit by hand
 
 | Variable | Set by |
@@ -353,8 +379,8 @@ as failures.
 This means a run can report `0 failed` while having checked far less than it should.
 **Always read the assertion total alongside the failure count.**
 
-- A full healthy run is **90 assertions**.
-- `0 failed` with fewer than 90 assertions means something was skipped.
+- A full healthy run is **93 assertions** (90 if the `9_ExistingAPI` credentials are left blank).
+- `0 failed` with fewer assertions than that means something was skipped.
 
 To make this visible, every run prints a summary before the results table:
 
@@ -379,7 +405,7 @@ their dependents were skipped.
 `2_PreClean` removes any `SMOKE`-prefixed artifact left over from an interrupted run —
 API, application and throttling policy — before creating anything. A run that is killed
 half-way does not block the next one. Recovery runs report *more* assertions than normal
-(around 95), because PreClean has real work to verify.
+(around 98), because PreClean has real work to verify.
 
 **Every delete is scoped to the `SMOKE` prefix.**
 The cleanup logic only ever matches artifacts whose name begins with `SMOKE`. It is
@@ -427,5 +453,8 @@ covered by the `*.orig` rule.
 | `7.1.1 Create Throttling Policy` returns **401** | The runtime role lacks `apim:tier_manage`. See section 6 |
 | `6.2 Invoke API` fails after 20 attempts with **404** | The revision did not reach the gateway. Check Control Plane → Gateway artifact sync and that the revision deployed to the `Default` label |
 | `6.4 Invoke with Revoked Token` never returns 401 | Token revocation events are not reaching the gateway. Check the Traffic Manager JMS topic and the gateway's event listener configuration |
+| `9.1 Generate Access Token (Existing APP)` returns **401** | `existing_app_client_id` / `existing_app_client_secret` are wrong, or the application's grant types do not include Client Credentials |
+| `9.2 Invoke Existing API` returns **404** | The existing API is not deployed on this gateway, or `existing_api_path` / the vhost is wrong |
+| `9.2 Invoke Existing API` returns **403** | The application is not subscribed to the API, or the subscription has not reached the gateway |
 | `OAuth client unchanged since the pinned run` fails | The OAuth client was recreated — typically a Key Manager rebuild or a database restore. Re-run `bootstrap-client.sh` and clear `expected_client_id` |
-| A run reports `0 failed` but fewer than 90 checks | Requests were skipped. Read the `RUN SUMMARY` block above the results table |
+| A run reports `0 failed` but fewer than 93 checks | Requests were skipped. Read the `RUN SUMMARY` block above the results table |
