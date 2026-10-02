@@ -352,11 +352,6 @@ apim:common_operation_policy_view        apim:common_operation_policy_manage
 apim:api_mediation_policy_manage
 ```
 
-On a stock 4.5.0 deployment the built-in `Internal/WSO2_ReadWrite` role covers all of these
-**except `apim:tier_manage` and `apim:tier_view`**, which are admin-only by default. Add
-those two to the role via **Admin Portal → Settings → Scope Assignments**, or remove the
-`7.1_Throttling` folder if throttling coverage is not required.
-
 ---
 
 ## 7. Reading the results
