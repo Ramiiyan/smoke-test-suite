@@ -176,7 +176,7 @@ two the suite uses.
 ```
 <suite-directory>/
 ├── README.md                                        this file
-├── smoke-test-suite.postman_collection.json          the suite (70 requests)
+├── smoke-test-suite.postman_collection.json         the suite (70 requests)
 ├── APIM-4.5.0-Local.postman_environment.json        environment TEMPLATE -- copy, do not edit
 ├── working.local.json                               your filled-in copy -- you create this (section 6)
 ├── bootstrap-client.sh                              ONE-TIME admin setup (section 4)
@@ -259,8 +259,9 @@ newman run smoke-test-suite.postman_collection.json \
 ### A healthy run ends with
 
 ```
-│              assertions │  93 │  0 │
-│ total run duration: 13.9s              │
+│              assertions │               93 │                0 │
+├─────────────────────────┴──────────────────┴──────────────────┤
+│ total run duration: 13.9s                                     │
 ```
 
 **Read both numbers.** `0 failed` alone is not sufficient — see section 8.
